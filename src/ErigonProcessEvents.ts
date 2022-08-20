@@ -1,9 +1,61 @@
-function getDateDifferenceInSecs(date1, date2) {
+
+function getDateDifferenceInSecs(date1:Date, date2:Date) {
     return (date1.getTime() - date2.getTime()) / 1000;
 }
 
 
-export function plotFromErigonLogEvents(data, sizes) {
+class SizesInfo {
+    x: Date[];
+    val: number[];
+    constructor(x: Date[], val: number[]) {
+        this.x = x;
+        this.val = val;
+    }
+
+    mapToNewXs(arr: Date[]) : number[] {
+
+        let idx1 = 0;
+        let idx2 = 0;
+        let arr1 = this.x;
+        let arr2 = arr;
+
+        if (arr1.length === 0) {
+            return [];
+        }
+        if (arr2.length === 0) {
+            return [];
+        }
+
+        let res: number[] = [];
+        for (let i = 0; i < arr2.length; i++) {
+            res.push(0);
+        }
+        while (idx1 < arr1.length && idx2 < arr2.length) {
+            if (arr1[idx1] < arr2[idx2]) {
+                res[idx2] = this.val[idx1];
+                idx1 += 1;
+                continue;
+            } else {
+                idx2 += 1;
+                if (idx2 < arr2.length) {
+                    res[idx2] = res[idx2 - 1];
+                }
+                continue;
+            }
+        }
+        return res;
+    }
+
+    getXData() {
+        return this.x;
+    }
+    getValData() {
+        return this.val;
+    }
+
+}
+
+export function plotFromErigonLogEvents(data:any, sizes:any) : any {
     let events = data.events;
     let times = [];
     let block_nums = [];
@@ -11,11 +63,11 @@ export function plotFromErigonLogEvents(data, sizes) {
     let execution_from = 0;
     let execution_to = 15380000;
     for (let d of events) {
-        if (d.type == "execution") {
+        if (d.type === "execution") {
             times.push(new Date(d.time));
             block_nums.push(parseFloat(d.info.blk_num));
             block_speeds.push(parseFloat(d.info.blk_per_s));
-        } else if (d.type == "execution_limits") {
+        } else if (d.type === "execution_limits") {
             execution_from = d.info.from;
             execution_to = parseInt(d.info.to);
             //vals.push(5);
@@ -23,14 +75,17 @@ export function plotFromErigonLogEvents(data, sizes) {
     }
     console.log(execution_to);
 
-    let sizes_times = []
-    let sizes_values = []
+    let sizes_times : Date[] = [];
+    let sizes_values : number[] = [];
     console.log(sizes);
     for (let dt in sizes) {
-        sizes_times.push(dt);
-        sizes_values.push(sizes[dt]["erigon_data_size"]);
-
+        let dObj = new Date(dt);
+        let sizeValue = parseInt(sizes[dt]["erigon_data_size"]);
+        sizes_times.push(dObj);
+        sizes_values.push(sizeValue);
     }
+    let sizesInfo = new SizesInfo(sizes_times, sizes_values);
+
 
 
     if (times.length > 10) {
@@ -60,6 +115,18 @@ export function plotFromErigonLogEvents(data, sizes) {
         //new_date.setUTCSeconds(last_date.getUTCSeconds());
         new_date.setTime(last_date.getTime() + time_left * 1000);
 
+
+        let cross_array_x = [];
+        let cross_array_y = [];
+
+        let x = times;
+        let y = sizesInfo.mapToNewXs(times);
+        for (let idx1 = 0; idx1 < times.length; idx1 += 1) {
+            cross_array_x.push(block_nums[idx1]);
+            cross_array_y.push(y[idx1]);
+        }
+
+
         let plotlyData = [
             {
                 x: times,
@@ -83,14 +150,22 @@ export function plotFromErigonLogEvents(data, sizes) {
 
             },
             {
-                x: sizes_times,
-                y: sizes_values,
+                x: sizesInfo.getXData(),
+                y: sizesInfo.getValData(),
                 type: 'scatter',
                 yaxis: 'y2'
+            },
+        ];
+        let plotlyData2 = [
+            {
+                x: cross_array_x,
+                y: cross_array_y
             }
         ];
+
         return {
             "plotlyData": plotlyData,
+            "plotlyData2": plotlyData2,
             "lastSpeed": last_speed,
             "estimatedCompletion": new_date,
             "lastDate": last_date,
@@ -98,12 +173,4 @@ export function plotFromErigonLogEvents(data, sizes) {
     }
 
     return [];
-
-
-
-
-
-
-
-
 }

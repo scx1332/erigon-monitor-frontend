@@ -56,25 +56,25 @@ class ErigonProvider {
     }
 
     async updateDataLoop() {
-        let updateLoopNo = 0;
         while (true) {
-            while (this.listeners.size == 0) {
+            while (this.listeners.size === 0) {
                 this.market = null;
                 this.last_error = "Waiting for data";
                 await new Promise(r => setTimeout(r, 500));
             }
             try {
+                console.log("Fetch erigon progress");
                 await this.fetchErigonProgress();
             } catch (ex) {
                 this.events = null;
                 this.sizes = null;
                 this.last_error = ex.message;
             } finally {
-                await new Promise(r => setTimeout(r, 5000));
-            }
-            for (let callback of this.listeners) {
-                this.callbackCount += 1;
-                callback();
+                for (let callback of this.listeners) {
+                    this.callbackCount += 1;
+                    callback();
+                }
+                await new Promise(r => setTimeout(r, 500000));
             }
         }
     }
