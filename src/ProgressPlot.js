@@ -1,14 +1,14 @@
 import Plot from 'react-plotly.js';
 import erigonProvider from "./ErigonProvider";
-import {useEffect, useReducer} from "react";
+import {useEffect, useState} from "react";
 
 
 function ProgressPlot(props) {
-    const [_, forceUpdate] = useReducer((x) => x + 1, 0);
+    const [plotData, setPlotData] = useState(null);
 
 
     const handleDataProviderChange = function () {
-        forceUpdate();
+        setPlotData(erigonProvider.getPlotData());
     };
 
     useEffect( () => {
@@ -19,7 +19,9 @@ function ProgressPlot(props) {
     }, []);
 
     const render = function () {
-        let plotData = erigonProvider.getPlotData();
+        if (plotData === null) {
+            return (<div>No data</div>)
+        }
         return (
             <div>
 

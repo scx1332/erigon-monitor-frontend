@@ -119,7 +119,6 @@ export function plotFromErigonLogEvents(data:any, sizes:any) : any {
         let cross_array_x = [];
         let cross_array_y = [];
 
-        let x = times;
         let y = sizesInfo.mapToNewXs(times);
         for (let idx1 = 0; idx1 < times.length; idx1 += 1) {
             cross_array_x.push(block_nums[idx1]);
