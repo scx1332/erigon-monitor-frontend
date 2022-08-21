@@ -21,18 +21,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Build job
-  build:
+  build-react-page:
+
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Setup Pages
+
+    strategy:
+      matrix:   
+        node-version: [16.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    build:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build --if-present
+      - name: Setup Pages       
         uses: actions/configure-pages@v1
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
-          source: ./
+          source: ./build
           destination: ./_site
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
