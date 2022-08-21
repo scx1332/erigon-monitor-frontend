@@ -39,14 +39,10 @@ function ProgressPlot(props) {
         /><Plot
                 data={plotData["plotlyData2"]}
                 layout={ {
-                    title: 'Double Y Axis Example',
-                    yaxis: {title: 'yaxis title'},
-                    yaxis2: {
-                        title: 'yaxis2 title',
-                        titlefont: {color: 'rgb(148, 103, 189)'},
-                        tickfont: {color: 'rgb(148, 103, 189)'},
-                        overlaying: 'y',
-                        side: 'right'
+                    title: 'Execution db size',
+                    yaxis: {title: 'chaindata size'},
+                    xaxis: {
+                        title: 'block number',
                     }
                 } }
             />
