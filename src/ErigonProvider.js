@@ -47,9 +47,9 @@ class ErigonProvider {
     }
 
     async fetchErigonProgress() {
-        const response = await fetch('http://54.36.174.74:5000/events');
+        const response = await fetch('https://gateway.golem.network/erigon_mainnet_monitor/events');
         const events = await response.json();
-        const response2 = await fetch('http://54.36.174.74:5000/sizes');
+        const response2 = await fetch('https://gateway.golem.network/erigon_mainnet_monitor/sizes');
         const sizes = await response2.json();
         this.events = events;
         this.sizes = sizes;
